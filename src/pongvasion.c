@@ -74,6 +74,9 @@ int start() {
 	initTimers(60);
 
 
+	SDL_SetRenderDrawColor(globalRenderer, 255, 255, 255, 0); //TODO: PROBABLY UNNEEDED?
+	SDL_RenderClear(globalRenderer);
+
 	while (isGameRunning) {
 		SDL_Event sdlEvent;
 
@@ -83,9 +86,7 @@ int start() {
 				if (sdlEvent.user.code == TIMER_FPS) {
 					int x, y;
 					SDL_GetMouseState(&x, &y);
-					SDL_SetRenderDrawColor(globalRenderer, 255, 255, 255, 0); //TODO: PROBABLY UNNEEDED?
-					SDL_RenderClear(globalRenderer);
-					filledCircleColor(globalRenderer, x, y, 25, 0x000000FF);
+					filledCircleColor(globalRenderer, x, y, 25, 0xFF000000);
 					SDL_RenderPresent(globalRenderer);
 				} else { //==TIMER_TICK
 
