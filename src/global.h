@@ -1,4 +1,5 @@
 #pragma once
 #include <SDL.h>
 
-static SDL_Renderer *globalRenderer;
+SDL_Renderer *globalRenderer;
+int globalWindowWidth, globalWindowHeight;
