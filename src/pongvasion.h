@@ -20,11 +20,11 @@ enum TimerEnum {
 	TIMER_TICK
 };
 
-bool initSDL(char*, SDL_Window*);
-void close(SDL_Window*);
+bool initSDL(char*);
+void close();
 Uint32 timerCallbackSDL(Uint32, void*);
 void initTimers();
 void logErrorSDL(char*);
 void renderCurrentState();
 void updateGameState(const uint8_t*);
-int start();
+void start();

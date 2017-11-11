@@ -11,6 +11,11 @@
 
 const int maxVerticalSpeed;
 
+enum {
+	LEFT_PAD,
+	RIGHT_PAD
+};
+
 typedef struct Ball {
 	//the coordinates of the top left corner of the ball
 	int32_t x;
@@ -27,5 +32,9 @@ typedef struct Point {
 } Point;
 
 void initBall();
+Point getClosestPointOfBall(Ball, Point);
+Point getClosestPointOfPad(int);
+void detectBallCollision();
+void detectBallMaxSpeed();
 void updateBall();
 void renderBall();

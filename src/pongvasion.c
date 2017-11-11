@@ -1,7 +1,7 @@
 #include "pongvasion.h"
 
 //Initializes SDL and handles all errors
-bool initSDL(char* title, SDL_Window *window) {
+bool initSDL(char* title) {
 	bool success = true;
 
 	//TODO: AUTOMATIC SCREEN RESOLUTION DETECION
@@ -14,17 +14,17 @@ bool initSDL(char* title, SDL_Window *window) {
 		success = false;
 	} else {
 
-		window = SDL_CreateWindow(title,
+		globalWindow = SDL_CreateWindow(title,
 								  SDL_WINDOWPOS_CENTERED,
 								  SDL_WINDOWPOS_CENTERED,
 								  globalWindowWidth,
 								  globalWindowHeight,
 								  0); //TODO: SDL_FULLSCREEN
-		if (window == 0) {
+		if (globalWindow == 0) {
 			logErrorSDL("Error while creating the window: %s");
 			success = false;
 		} else {
-			globalRenderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+			globalRenderer = SDL_CreateRenderer(globalWindow, -1, SDL_RENDERER_ACCELERATED);
 			if (globalRenderer == 0) {
 				logErrorSDL("Failed to create the global renderer: %s");
 				success = false;
@@ -36,8 +36,8 @@ bool initSDL(char* title, SDL_Window *window) {
 }
 
 //Safely closes the program
-void close(SDL_Window *window) {
-	SDL_DestroyWindow(&window);
+void close() {
+	SDL_DestroyWindow(globalWindow);
 	SDL_Quit();
 }
 
@@ -84,12 +84,11 @@ void updateGameState(const uint8_t *keyboardState) {
 	updateBall();
 }
 
-int start() {
+void start() {
 	bool isGameRunning = true;
-	SDL_Window *window;
-	char* windowTitle = "Pongvasion";
+	char *windowTitle = "Pongvasion";
 	
-	initSDL(windowTitle, &window);
+	initSDL(windowTitle);
 	initTimers();
 	
 	initRandom();
@@ -118,5 +117,5 @@ int start() {
 		}
 	}
 
-	close(window);
+	close();
 }

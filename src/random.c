@@ -1,7 +1,7 @@
 #include "random.h"
 
 void initRandom() {
-	srand(time(0));
+	srand((unsigned int)time(0));
 }
 
 bool randomBool() {
