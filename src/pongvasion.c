@@ -70,16 +70,18 @@ void logErrorSDL(char* errorMessage) {
 }
 
 void renderCurrentState() {
-	SDL_SetRenderDrawColor(globalRenderer, 255, 255, 255, 255);
+	SDL_SetRenderDrawColor(globalRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(globalRenderer);
 
 	renderPads();
+	renderBall();
 
 	SDL_RenderPresent(globalRenderer);
 }
 
 void updateGameState(const uint8_t *keyboardState) {
 	updatePads(keyboardState);
+	updateBall();
 }
 
 int start() {
@@ -90,7 +92,10 @@ int start() {
 	initSDL(windowTitle, &window);
 	initTimers();
 	
+	initRandom();
+
 	initPads();
+	initBall();
 
 	const uint8_t *keyboardState = SDL_GetKeyboardState(0); //Updates every time SDL_PollEvent() is called
 	

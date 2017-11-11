@@ -8,24 +8,24 @@
 
 #include "global.h"
 
-typedef struct Color {
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
-	uint8_t a;
-} Color;
-
 typedef struct Pad {
 	//the coordinates of the top left corner of the pad
-	uint32_t x;
-	uint32_t y;
-	uint32_t length;
-	uint32_t width;
+	//Originally unsigned, but caused problems with integer arithmetic
+	int32_t x;
+	int32_t y;
+	int32_t length;
+	int32_t width;
 	Color color;
 } Pad;
 
 
+Pad leftPad;
+Pad rightPad;
+int padSpeed;
+
 void initPads();
 bool checkBounds(Pad);
+bool boundaryCheckUp();
+bool boundaryCheckDown();
 void updatePads(const uint8_t*);
 void renderPads();

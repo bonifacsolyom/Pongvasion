@@ -8,6 +8,8 @@
 
 #include "global.h"
 #include "pad.h"
+#include "ball.h"
+#include "random.h"
 
 #define MILLISECONDS_IN_A_SECOND 1000
 #define FPSLIMIT 60
