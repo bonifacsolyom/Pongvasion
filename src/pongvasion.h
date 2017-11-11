@@ -21,7 +21,7 @@ enum TimerEnum {
 };
 
 bool initSDL(char*);
-void close();
+void closeGame();
 Uint32 timerCallbackSDL(Uint32, void*);
 void initTimers();
 void logErrorSDL(char*);

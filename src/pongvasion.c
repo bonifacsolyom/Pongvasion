@@ -36,7 +36,7 @@ bool initSDL(char* title) {
 }
 
 //Safely closes the program
-void close() {
+void closeGame() {
 	SDL_DestroyWindow(globalWindow);
 	SDL_Quit();
 }
@@ -117,5 +117,5 @@ void start() {
 		}
 	}
 
-	close();
+	closeGame();
 }
