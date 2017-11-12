@@ -26,6 +26,8 @@ typedef struct Ball {
 	int32_t verticalSpeed;
 } Ball;
 
+Ball ball;
+
 typedef struct Point {
 	int x;
 	int y;

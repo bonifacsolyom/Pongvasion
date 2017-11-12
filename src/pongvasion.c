@@ -37,6 +37,7 @@ bool initSDL(char* title) {
 
 //Safely closes the program
 void closeGame() {
+	freeEnemies();
 	SDL_DestroyWindow(globalWindow);
 	SDL_Quit();
 }
@@ -69,23 +70,30 @@ void logErrorSDL(char* errorMessage) {
 	printf("%s\n%s", errorMessage, SDL_GetError());
 }
 
-void renderCurrentState() {
+void renderCurrentState(bool *isGameOver) {
 	SDL_SetRenderDrawColor(globalRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(globalRenderer);
-
-	renderPads();
-	renderBall();
+	if (!*isGameOver) {
+		renderPads();
+		renderEnemies();
+		renderBall();
+	}
 
 	SDL_RenderPresent(globalRenderer);
 }
 
-void updateGameState(const uint8_t *keyboardState) {
-	updatePads(keyboardState);
-	updateBall();
+void updateGameState(const uint8_t *keyboardState, bool *isGameOver) {
+	if (!*isGameOver) {
+		updatePads(keyboardState);
+		updateBall();
+		generateEnemies();
+		*isGameOver = updateEnemies();
+	}
 }
 
 void start() {
 	bool isGameRunning = true;
+	bool isGameOver = false;
 	char *windowTitle = "Pongvasion";
 	
 	initSDL(windowTitle);
@@ -95,6 +103,7 @@ void start() {
 
 	initPads();
 	initBall();
+	initEnemies();
 
 	const uint8_t *keyboardState = SDL_GetKeyboardState(0); //Updates every time SDL_PollEvent() is called
 	
@@ -105,9 +114,9 @@ void start() {
 			switch (sdlEvent.type) {
 			case SDL_USEREVENT:
 				if (sdlEvent.user.code == TIMER_TICK) {
-					updateGameState(keyboardState);
+					updateGameState(keyboardState, &isGameOver);
 				} else if (sdlEvent.user.code == TIMER_FPS ) {
-					renderCurrentState();
+					renderCurrentState(&isGameOver);
 				}
 				break;
 			case SDL_QUIT:

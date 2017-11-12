@@ -10,6 +10,7 @@
 #include "pad.h"
 #include "ball.h"
 #include "random.h"
+#include "enemy.h"
 
 #define MILLISECONDS_IN_A_SECOND 1000
 #define FPSLIMIT 60
@@ -25,6 +26,6 @@ void closeGame();
 Uint32 timerCallbackSDL(Uint32, void*);
 void initTimers();
 void logErrorSDL(char*);
-void renderCurrentState();
-void updateGameState(const uint8_t*);
+void renderCurrentState(bool*);
+void updateGameState(const uint8_t*, bool*);
 void start();

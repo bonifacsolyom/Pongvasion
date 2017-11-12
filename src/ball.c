@@ -1,12 +1,12 @@
 #include "ball.h"
 
-Ball ball;
+//TODO: REMOVE HARDCODED SPEED
 const int maxVerticalSpeed = 8;
 
 void initBall() {
 	ball.x = globalWindowWidth / 2;
 	ball.y = globalWindowHeight / 2;
-	ball.radius = 15; //TODO: EXPERIMENT WITH THIS NUMBER
+	ball.radius = 30; //TODO: REMOVE HARDCODED SIZES AND SPEEDS
 	ball.horizontalSpeed = randomBool() ? 10 : -10;
 	ball.verticalSpeed = randomNumber(-maxVerticalSpeed, maxVerticalSpeed);
 	ball.color.r = 255;
@@ -59,12 +59,7 @@ Point getClosestPointOfPad(int whichPad) {
 
 //Detects if the ball is colliding with anything, and changes its speed accordingly if so
 void detectBallCollision() {
-	Ball previousBall;
-	previousBall.x = ball.x - ball.horizontalSpeed;
-	previousBall.y = ball.y - ball.verticalSpeed;
-	previousBall.radius = ball.radius;
-
-	//The radius in which collision is checked between the Ball and the Pad
+	//The radius in which collision is checked between the ball and the pad
 	int collisionRadius = ball.horizontalSpeed;
 
 	int ballTop = ball.y - ball.radius;
@@ -72,23 +67,23 @@ void detectBallCollision() {
 
 	//Detect if touching any pads
 	if (ball.horizontalSpeed > 0) { //If the ball is headed towards the left, we only need to check collision with the left pad
-		if ((ballBottom >= rightPad.y) && (ballTop <= (rightPad.y + rightPad.length))) { //The ball is in line with the pad
+		if ((ballBottom >= rightPad.y) && (ballTop <= (rightPad.y + rightPad.length))) { //If the ball is in line with the pad
 			Point closestPointOfPad = getClosestPointOfPad(RIGHT_PAD);
 			Point closestPointOfBall = getClosestPointOfBall(ball, closestPointOfPad);
 			if (closestPointOfBall.x >= closestPointOfPad.x && (closestPointOfBall.x - collisionRadius) < closestPointOfPad.x) {
-				//(Distance of the ball from the middle of the pad) / (Length of the pad's half) -> This way we get a value between 0 and 1, which we then multiply with the maximum vertical speed.
 				int rightPadMiddle = rightPad.y + (rightPad.length / 2);
+				//(Distance of the ball from the middle of the pad) / (Length of the pad's half) -> This way we get a value between -1 and 1, which we then multiply with the maximum vertical speed.
 				ball.verticalSpeed = ((double)(closestPointOfBall.y - rightPadMiddle) / (double)(rightPad.length / 2)) * maxVerticalSpeed;
 				ball.horizontalSpeed *= -1;
 			}
 		}
 	} else { //The ball is headed towards the right pad
-		if ((ballBottom >= leftPad.y) && (ballTop <= (leftPad.y + leftPad.length))) { //The ball is in line with the pad
+		if ((ballBottom >= leftPad.y) && (ballTop <= (leftPad.y + leftPad.length))) { //If the ball is in line with the pad
 			Point closestPointOfPad = getClosestPointOfPad(LEFT_PAD);
 			Point closestPointOfBall = getClosestPointOfBall(ball, closestPointOfPad);
 			if (closestPointOfBall.x <= closestPointOfPad.x && (closestPointOfBall.x - collisionRadius) > closestPointOfPad.x) {
-				//(Distance of the ball from the middle of the pad) / (Length of the pad's half) -> This way we get a value between 0 and 1, which we then multiply with the maximum vertical speed.
 				int leftPadMiddle = leftPad.y + (leftPad.length / 2);
+				//(Distance of the ball from the middle of the pad) / (Length of the pad's half) -> This way we get a value between -1 and 1, which we then multiply with the maximum vertical speed.
 				ball.verticalSpeed = ((double)(closestPointOfBall.y - leftPadMiddle) / (double)(leftPad.length / 2)) * maxVerticalSpeed;
 				ball.horizontalSpeed *= -1;
 			}
