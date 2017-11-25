@@ -5,9 +5,9 @@
 
 #include "global.h"
 #include "ball.h"
+#include "score.h"
 
 typedef struct Enemy {
-	//Double because they were moving too quickly otherwise 
 	double x;
 	double y;
 	int radius;

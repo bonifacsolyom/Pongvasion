@@ -38,5 +38,6 @@ Point getClosestPointOfBall(Ball, Point);
 Point getClosestPointOfPad(int);
 void detectBallCollision();
 void detectBallMaxSpeed();
-void updateBall();
+bool detectIfOutOfBounds();
+bool updateBall();
 void renderBall();

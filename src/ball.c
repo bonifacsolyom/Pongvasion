@@ -66,25 +66,27 @@ void detectBallCollision() {
 	int ballBottom = ball.y + ball.radius;
 
 	//Detect if touching any pads
-	if (ball.horizontalSpeed > 0) { //If the ball is headed towards the left, we only need to check collision with the left pad
+	if (ball.horizontalSpeed > 0) { //If the ball is headed towards the right, we only need to check collision with the right pad
 		if ((ballBottom >= rightPad.y) && (ballTop <= (rightPad.y + rightPad.length))) { //If the ball is in line with the pad
 			Point closestPointOfPad = getClosestPointOfPad(RIGHT_PAD);
 			Point closestPointOfBall = getClosestPointOfBall(ball, closestPointOfPad);
-			if (closestPointOfBall.x >= closestPointOfPad.x && (closestPointOfBall.x - collisionRadius) < closestPointOfPad.x) {
+			//The first check is to see whether the center of the ball has already surpassed the pad or not
+			if ((ball.x <= rightPad.x) && (closestPointOfBall.x >= closestPointOfPad.x) && ((closestPointOfBall.x - collisionRadius) < closestPointOfPad.x)) {
 				int rightPadMiddle = rightPad.y + (rightPad.length / 2);
 				//(Distance of the ball from the middle of the pad) / (Length of the pad's half) -> This way we get a value between -1 and 1, which we then multiply with the maximum vertical speed.
-				ball.verticalSpeed = ((double)(closestPointOfBall.y - rightPadMiddle) / (double)(rightPad.length / 2)) * maxVerticalSpeed;
+				ball.verticalSpeed = (int)(((double)(closestPointOfBall.y - rightPadMiddle) / (double)(rightPad.length / 2)) * maxVerticalSpeed);
 				ball.horizontalSpeed *= -1;
 			}
 		}
-	} else { //The ball is headed towards the right pad
+	} else { //The ball is headed towards the left pad
 		if ((ballBottom >= leftPad.y) && (ballTop <= (leftPad.y + leftPad.length))) { //If the ball is in line with the pad
 			Point closestPointOfPad = getClosestPointOfPad(LEFT_PAD);
 			Point closestPointOfBall = getClosestPointOfBall(ball, closestPointOfPad);
-			if (closestPointOfBall.x <= closestPointOfPad.x && (closestPointOfBall.x - collisionRadius) > closestPointOfPad.x) {
+			//The first check is to see whether the center of the ball has already surpassed the pad or not
+			if ((ball.x >= leftPad.x) && (closestPointOfBall.x <= closestPointOfPad.x) && ((closestPointOfBall.x - collisionRadius) > closestPointOfPad.x)) {
 				int leftPadMiddle = leftPad.y + (leftPad.length / 2);
 				//(Distance of the ball from the middle of the pad) / (Length of the pad's half) -> This way we get a value between -1 and 1, which we then multiply with the maximum vertical speed.
-				ball.verticalSpeed = ((double)(closestPointOfBall.y - leftPadMiddle) / (double)(leftPad.length / 2)) * maxVerticalSpeed;
+				ball.verticalSpeed = (int)(((double)(closestPointOfBall.y - leftPadMiddle) / (double)(leftPad.length / 2)) * maxVerticalSpeed);
 				ball.horizontalSpeed *= -1;
 			}
 		}
@@ -101,11 +103,18 @@ void detectBallMaxSpeed() {
 	else if (ball.verticalSpeed < -maxVerticalSpeed) ball.verticalSpeed = -maxVerticalSpeed;
 }
 
-void updateBall() {
+bool detectIfOutOfBounds() {
+	bool onTheRight = (ball.x - ball.radius) > globalWindowWidth;
+	bool onTheLeft = (ball.x + ball.radius) < 0;
+	return onTheRight || onTheLeft;
+}
+
+bool updateBall() {
 	detectBallCollision();
 	detectBallMaxSpeed();
 	ball.x += ball.horizontalSpeed;
 	ball.y += ball.verticalSpeed;
+	return detectIfOutOfBounds();
 }
 
 void renderBall() {
@@ -118,7 +127,7 @@ void renderBall() {
 					 ball.color.b,
 					 ball.color.a);
 
-	//TODO: REMOVE DEBUG FEATURES
+#ifdef _DEBUG
 	Point pointRight = getClosestPointOfPad(RIGHT_PAD);
 	filledCircleRGBA(globalRenderer,
 					 pointRight.x,
@@ -155,4 +164,5 @@ void renderBall() {
 					 0,
 					 0,
 					 255);
+#endif
 }

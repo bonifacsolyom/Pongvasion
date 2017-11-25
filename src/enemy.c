@@ -15,6 +15,7 @@ void initEnemies() {
 	easyEnemy.color.g = 255;
 	easyEnemy.color.b = 0;
 	easyEnemy.color.a = 255;
+	easyEnemy.points = 10;
 
 	normalEnemy.radius = 35;
 	normalEnemy.points = 25;
@@ -23,6 +24,7 @@ void initEnemies() {
 	normalEnemy.color.g = 0;
 	normalEnemy.color.b = 255;
 	normalEnemy.color.a = 255;
+	normalEnemy.points = 50;
 
 	hardEnemy.radius = 25;
 	hardEnemy.points = 50;
@@ -31,6 +33,7 @@ void initEnemies() {
 	hardEnemy.color.g = 0;
 	hardEnemy.color.b = 0;
 	hardEnemy.color.a = 255;
+	hardEnemy.points = 100;
 
 	enemyList.first = malloc(sizeof(EnemyListUnit));
 	enemyList.last = malloc(sizeof(EnemyListUnit));
@@ -72,6 +75,18 @@ void spawnEnemy(Enemy enemy) {
 //Should be called when the ball hits the enemy
 //TODO: The ball should bounce away in the correct direction from the enemy
 void deleteEnemy(EnemyListUnit *enemyToDelete) {
+	globalScore += enemyToDelete->enemy.points;
+	//The following is done so the player can't exploit the ball bouncing between the two pads with a vertical speed of 0
+	switch (randomNumber(1, 3)) {
+	case 1: 
+		ball.verticalSpeed += 1;
+		break;
+	case 2:
+		ball.verticalSpeed -= 1;
+		break;
+	default:
+		break;
+	}
 	EnemyListUnit *temp = enemyToDelete;
 	enemyToDelete->previous->next = enemyToDelete->next;
 	enemyToDelete->next->previous = enemyToDelete->previous;

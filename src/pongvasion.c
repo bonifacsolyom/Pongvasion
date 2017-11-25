@@ -15,11 +15,11 @@ bool initSDL(char* title) {
 	} else {
 
 		globalWindow = SDL_CreateWindow(title,
-								  SDL_WINDOWPOS_CENTERED,
-								  SDL_WINDOWPOS_CENTERED,
-								  globalWindowWidth,
-								  globalWindowHeight,
-								  0); //TODO: SDL_FULLSCREEN
+										SDL_WINDOWPOS_CENTERED,
+										SDL_WINDOWPOS_CENTERED,
+										globalWindowWidth,
+										globalWindowHeight,
+										0); //TODO: SDL_FULLSCREEN
 		if (globalWindow == 0) {
 			logErrorSDL("Error while creating the window: %s");
 			success = false;
@@ -32,13 +32,19 @@ bool initSDL(char* title) {
 		}
 	}
 
+	if (TTF_Init() < 0) {
+		printf("Unable to initialize SDL: %s\n", TTF_GetError());
+		success = false;
+	}
 	return success;
 }
 
 //Safely closes the program
-void closeGame() {
+void closeGame(Score *scoreArray, int arraySize) {
 	freeEnemies();
+	cleanUpScores(scoreArray, arraySize);
 	SDL_DestroyWindow(globalWindow);
+	TTF_Quit();
 	SDL_Quit();
 }
 
@@ -58,10 +64,10 @@ void initTimers() {
 	int delayBetweenFrames = MILLISECONDS_IN_A_SECOND / FPSLIMIT;
 	int tickRate = MILLISECONDS_IN_A_SECOND / TICKS_PER_SECOND;
 	if (SDL_AddTimer(delayBetweenFrames, timerCallbackSDL, (int *)TIMER_FPS) == 0) {
-		logErrorSDL("Error while creating the FPS timer!"); 
+		logErrorSDL("Error while creating the FPS timer!");
 	}
 	if (SDL_AddTimer(tickRate, timerCallbackSDL, (int *)TIMER_TICK) == 0) {
-		logErrorSDL("Error while creating the TICK timer!");
+		logErrorSDL("Error while creating the tick timer!");
 	}
 }
 
@@ -70,43 +76,44 @@ void logErrorSDL(char* errorMessage) {
 	printf("%s\n%s", errorMessage, SDL_GetError());
 }
 
-void renderCurrentState(bool *isGameOver) {
+void renderCurrentState() {
 	SDL_SetRenderDrawColor(globalRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(globalRenderer);
-	if (!*isGameOver) {
-		renderPads();
-		renderEnemies();
-		renderBall();
-	}
+	renderPads();
+	renderEnemies();
+	renderBall();
+	renderScore();
 
 	SDL_RenderPresent(globalRenderer);
 }
 
-void updateGameState(const uint8_t *keyboardState, bool *isGameOver) {
-	if (!*isGameOver) {
-		updatePads(keyboardState);
-		updateBall();
-		generateEnemies();
-		*isGameOver = updateEnemies();
-	}
+//Returns true when game is over
+bool updateGameState(const uint8_t *keyboardState) {
+	updatePads(keyboardState);
+	bool ballOut = updateBall();
+	generateEnemies();
+	bool enemyReached = updateEnemies();
+	updateScore();
+	return ballOut || enemyReached;
 }
 
 void start() {
 	bool isGameRunning = true;
 	bool isGameOver = false;
+	bool areScoresWrittenToFile = false;
 	char *windowTitle = "Pongvasion";
-	
+	Score *scoreArray[SCORES_TO_SAVE];
+
 	initSDL(windowTitle);
 	initTimers();
-	
 	initRandom();
-
 	initPads();
 	initBall();
 	initEnemies();
+	initScore();
 
 	const uint8_t *keyboardState = SDL_GetKeyboardState(0); //Updates every time SDL_PollEvent() is called
-	
+
 	while (isGameRunning) {
 		SDL_Event sdlEvent;
 
@@ -114,9 +121,19 @@ void start() {
 			switch (sdlEvent.type) {
 			case SDL_USEREVENT:
 				if (sdlEvent.user.code == TIMER_TICK) {
-					updateGameState(keyboardState, &isGameOver);
-				} else if (sdlEvent.user.code == TIMER_FPS ) {
-					renderCurrentState(&isGameOver);
+					if (!isGameOver) {
+						isGameOver = updateGameState(keyboardState);
+					}
+				} else if (sdlEvent.user.code == TIMER_FPS) {
+					if (!isGameOver) {
+						renderCurrentState();
+					} else {
+						if (!areScoresWrittenToFile) {
+							writeHighScoreToFile(scoreArray, SCORES_TO_SAVE);
+							areScoresWrittenToFile = true;
+						}
+						renderHighScoreScreen(scoreArray, SCORES_TO_SAVE);
+					}
 				}
 				break;
 			case SDL_QUIT:
@@ -126,5 +143,5 @@ void start() {
 		}
 	}
 
-	closeGame();
+	closeGame(scoreArray, SCORES_TO_SAVE);
 }
