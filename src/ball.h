@@ -9,7 +9,7 @@
 #include "random.h"
 #include "pad.h"
 
-const int maxVerticalSpeed;
+int maxVerticalSpeed;
 
 enum {
 	LEFT_PAD,

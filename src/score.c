@@ -9,6 +9,7 @@ SDL_Texture *highScoreTexture;
 HighScore *highScoreArray;
 
 SDL_Color scoreColor;
+SDL_Color currentScoreColor;
 
 int scoreSurfaceWidth;
 int scoreSurfaceHeight;
@@ -16,15 +17,20 @@ int scoreSurfaceHeight;
 bool createdHighScoreTextures = false;
 
 void initScore(int arraySize) {
-	//TODO: NO HARDCODED VALUES
-	//TODO: ERROR HANDLING
-	scoreFont = TTF_OpenFont("data/04B_30__.ttf", 28);
-	highScoreFont = TTF_OpenFont("data/04B_30__.ttf", 50);
+	scoreFont = TTF_OpenFont("data/04B_30__.ttf", globalWindowHeight / 24);
+	highScoreFont = TTF_OpenFont("data/04B_30__.ttf", globalWindowHeight / 15);
+	if (scoreFont == 0 || highScoreFont == 0) {
+		printf("Error while loading the fonts: %s\n", TTF_GetError());
+	}
 
 	scoreColor.r = 255;
 	scoreColor.g = 255;
 	scoreColor.b = 255;
 	scoreColor.a = 255;
+	currentScoreColor.r = 255;
+	currentScoreColor.g = 255;
+	currentScoreColor.b = 0;
+	currentScoreColor.a = 255;
 
 
 	highScoreArray = (HighScore *)malloc(sizeof(HighScore) * arraySize);
@@ -36,14 +42,18 @@ char *getCurrentTime() {
 	struct tm tm = *localtime(&t);
 	char *returnString = (char *)malloc(sizeof(char) * 100);
 	sprintf(returnString, "%d/%d/%d-%d:%d:%d", tm.tm_year % 100, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+#ifdef _DEBUG
 	printf("returnString: %p\n", returnString);
+#endif
 	return returnString;
 }
 
 void readHighScoresFromFile(Score *scoreArray, int arraySize) {
 	FILE *scoreFile;
-	//TODO: ERROR HANDLING
 	scoreFile = fopen("data/scores.txt", "r");
+	if (scoreFile == 0) {
+		printf("Could not open scores.txt!\n");
+	}
 	char buffer[255];
 	for (int i = 0; i < arraySize; i++) {
 		fscanf(scoreFile, "%s", buffer);
@@ -55,7 +65,7 @@ void readHighScoresFromFile(Score *scoreArray, int arraySize) {
 
 }
 
-void writeHighScoreToFile(Score *scoreArray, int arraySize) {
+int writeHighScoreToFile(Score *scoreArray, int arraySize) {
 	readHighScoresFromFile(scoreArray, arraySize);
 
 	int pos = 0; //The index which will get replaced by the global score
@@ -63,7 +73,7 @@ void writeHighScoreToFile(Score *scoreArray, int arraySize) {
 		if (globalScore >= scoreArray[pos].score) break;
 		pos++;
 	}
-
+	int currentScorePosition = pos;
 	//Inserting the new high score in the top 10
 	Score replaceScore;
 	replaceScore.score = globalScore;
@@ -74,20 +84,24 @@ void writeHighScoreToFile(Score *scoreArray, int arraySize) {
 		scoreArray[pos] = replaceScore;
 		replaceScore = tempScore;
 		if (pos == arraySize - 1) {
+#ifdef _DEBUG
 			printf("FREEING tempscore: %p\n", tempScore.date);
-	free(tempScore.date);
+#endif
+			free(tempScore.date);
 		}
 	}
 
 
 	FILE *scoreFile;
-	//TODO: ERROR HANDLING
 	scoreFile = fopen("data/scores.txt", "w+");
+	if (scoreFile == 0) {
+		printf("Could not open scores.txt!\n");
+	}
 	for (int i = 0; i < arraySize; i++) {
 		fprintf(scoreFile, "%s\n%d\n", scoreArray[i].date, scoreArray[i].score);
 	}
 	fclose(scoreFile);
-
+	return currentScorePosition;
 }
 
 
@@ -98,7 +112,9 @@ void updateScore() {
 		sprintf(scoreString, "Score: %d", globalScore); //Effectively creates a string out of an integer (globalScore)
 
 		SDL_Surface* scoreSurface = TTF_RenderText_Solid(scoreFont, scoreString, scoreColor);
-		//TODO: ERROR HANDLING
+		if (scoreSurface == 0) {
+			printf("Error while creating a surface for the score: %s\n", TTF_GetError());
+		}
 		scoreSurfaceWidth = scoreSurface->w;
 		scoreSurfaceHeight = scoreSurface->h;
 		scoreTexture = SDL_CreateTextureFromSurface(globalRenderer, scoreSurface);
@@ -118,18 +134,20 @@ void renderScore() {
 	SDL_RenderCopy(globalRenderer, scoreTexture, 0, &targetRect);
 }
 
-void renderHighScoreScreen(Score *scoreArray, int arraySize) {
+void renderHighScoreScreen(Score *scoreArray, int arraySize, int currentScorePosition) {
 	SDL_SetRenderDrawColor(globalRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(globalRenderer);
 
-	//TODO: DON'T RENDER IF 0
-	//TODO: HIGHLIGHT CURRENT SCORE WITH YELLOW
 	for (int i = 0; i < arraySize; i++) {
 		char highScoreString[50];
-		sprintf(highScoreString, "%s: %d", scoreArray[i].date, scoreArray[i].score);
+		if (strcmp(scoreArray[i].date, "0") != 0) {
+			sprintf(highScoreString, "%s %d", scoreArray[i].date, scoreArray[i].score);
+		} else {
+			strcpy(highScoreString, " ");
+		}
 		//TTF_RenderText_Solid is a very cpu intensive method, so we have to make sure only to call it when necessary
 		if (!createdHighScoreTextures) {
-			SDL_Surface* highScoreSurface = TTF_RenderText_Solid(highScoreFont, highScoreString, scoreColor);
+			SDL_Surface* highScoreSurface = TTF_RenderText_Solid(highScoreFont, highScoreString, (i == currentScorePosition) ? currentScoreColor : scoreColor);
 			if (highScoreSurface == 0) {
 				printf("Error while creating the SDL_Surface for the high scores: %s\n", SDL_GetError());
 			} else {
@@ -153,11 +171,15 @@ void renderHighScoreScreen(Score *scoreArray, int arraySize) {
 }
 
 void cleanUpScores(Score *scoreArray, int arraySize) {
+#ifdef _DEBUG
 	printf("FREEING:\n");
+#endif
 	for (int i = 0; i < arraySize; i++) {
 		//memset(scoreArray[i].date, 0xFF, );
 		free(scoreArray[i].date);
+#ifdef _DEBUG
 		printf("scoreArray[%d].date: %p\n", i, scoreArray[i].date);
+#endif
 	}
 
 	SDL_DestroyTexture(scoreTexture);

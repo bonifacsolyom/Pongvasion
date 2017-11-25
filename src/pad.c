@@ -4,7 +4,7 @@ void initPads() {
 
 	padSpeed = 10;
 
-	const int padDistanceFromScreenEdge = globalWindowWidth / 100; //TODO: EXPERIMENT WITH THIS NUMBER
+	const int padDistanceFromScreenEdge = globalWindowWidth / 100;
 
 	leftPad.width = globalWindowWidth / 100;
 	rightPad.width = globalWindowWidth / 100;

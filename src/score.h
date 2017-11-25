@@ -25,9 +25,9 @@ typedef struct HighScore {
 
 void initScore(int);
 void readHighScoresFromFile(Score *, int);
-void writeHighScoreToFile(Score *, int);
+int writeHighScoreToFile(Score *, int);
 void updateScore();
 void renderScore();
-void renderHighScoreScreen(Score *, int);
+void renderHighScoreScreen(Score *, int, int);
 void cleanUpScores(Score *, int);
 

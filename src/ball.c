@@ -1,13 +1,13 @@
 #include "ball.h"
 
-//TODO: REMOVE HARDCODED SPEED
-const int maxVerticalSpeed = 8;
 
 void initBall() {
+	maxVerticalSpeed = globalWindowHeight / 90;
+
 	ball.x = globalWindowWidth / 2;
 	ball.y = globalWindowHeight / 2;
-	ball.radius = 30; //TODO: REMOVE HARDCODED SIZES AND SPEEDS
-	ball.horizontalSpeed = randomBool() ? 10 : -10;
+	ball.radius = globalWindowHeight / 24;
+	ball.horizontalSpeed = randomBool() ? globalWindowHeight / 72 : -(globalWindowHeight / 72);
 	ball.verticalSpeed = randomNumber(-maxVerticalSpeed, maxVerticalSpeed);
 	ball.color.r = 255;
 	ball.color.g = 255;

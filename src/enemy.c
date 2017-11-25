@@ -7,28 +7,27 @@ Enemy hardEnemy;
 EnemyList enemyList;
 
 void initEnemies() {
-	//TODO: REMOVE HARDCODED SIZES AND SPEEDS
-	easyEnemy.radius = 50;
+	easyEnemy.radius = globalWindowHeight / 14;
 	easyEnemy.points = 10;
-	easyEnemy.speed = 0.1;
+	easyEnemy.speed = (double)globalWindowHeight / 7200;
 	easyEnemy.color.r = 0;
 	easyEnemy.color.g = 255;
 	easyEnemy.color.b = 0;
 	easyEnemy.color.a = 255;
 	easyEnemy.points = 10;
 
-	normalEnemy.radius = 35;
+	normalEnemy.radius = globalWindowHeight / 20;
 	normalEnemy.points = 25;
-	normalEnemy.speed = 0.2;
+	normalEnemy.speed = (double)globalWindowHeight / 3600;
 	normalEnemy.color.r = 0;
 	normalEnemy.color.g = 0;
 	normalEnemy.color.b = 255;
 	normalEnemy.color.a = 255;
 	normalEnemy.points = 50;
 
-	hardEnemy.radius = 25;
+	hardEnemy.radius = globalWindowHeight / 28;
 	hardEnemy.points = 50;
-	hardEnemy.speed = 0.5;
+	hardEnemy.speed = (double)globalWindowHeight / 1440;
 	hardEnemy.color.r = 255;
 	hardEnemy.color.g = 0;
 	hardEnemy.color.b = 0;
@@ -42,7 +41,6 @@ void initEnemies() {
 }
 
 //Generates enemies with a random chance, easier enemies have a bigger chance of spawning
-//TODO: TWEAK THIS
 void generateEnemies() {
 	int enemyCount = 0;
 	EnemyListUnit *movingPointer = enemyList.first;
@@ -73,7 +71,6 @@ void spawnEnemy(Enemy enemy) {
 }
 
 //Should be called when the ball hits the enemy
-//TODO: The ball should bounce away in the correct direction from the enemy
 void deleteEnemy(EnemyListUnit *enemyToDelete) {
 	globalScore += enemyToDelete->enemy.points;
 	//The following is done so the player can't exploit the ball bouncing between the two pads with a vertical speed of 0
@@ -95,8 +92,8 @@ void deleteEnemy(EnemyListUnit *enemyToDelete) {
 
 //Checks whether the given enemy is colliding with the ball
 bool isCollidingWithBall(Enemy enemy) {
-	int deltaX = enemy.x - ball.x;
-	int deltaY = enemy.y - ball.y;
+	int deltaX = (int)enemy.x - ball.x;
+	int deltaY = (int)enemy.y - ball.y;
 	int distanceSquared = deltaX*deltaX + deltaY*deltaY;
 	int maxDistanceSquared = (enemy.radius + ball.radius) * (enemy.radius + ball.radius);
 	return distanceSquared <= maxDistanceSquared;
@@ -122,8 +119,8 @@ void renderEnemies() {
 	EnemyListUnit *movingPointer = enemyList.first->next;
 	while (movingPointer != enemyList.last) {
 		filledCircleRGBA(globalRenderer,
-						 movingPointer->enemy.x,
-						 movingPointer->enemy.y,
+						 (int)movingPointer->enemy.x,
+						 (int)movingPointer->enemy.y,
 						 movingPointer->enemy.radius,
 						 movingPointer->enemy.color.r,
 						 movingPointer->enemy.color.g,

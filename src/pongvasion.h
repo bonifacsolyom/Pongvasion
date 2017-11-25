@@ -16,7 +16,7 @@
 
 #define SCORES_TO_SAVE 10
 #define MILLISECONDS_IN_A_SECOND 1000
-#define FPSLIMIT 60
+#define FPSLIMIT 120
 #define TICKS_PER_SECOND 60
 
 enum TimerEnum {
@@ -25,7 +25,7 @@ enum TimerEnum {
 };
 
 bool initSDL(char*);
-void closeGame(Score *, int);
+void closeGame(Score *, int, bool);
 Uint32 timerCallbackSDL(Uint32, void*);
 void initTimers();
 void logErrorSDL(char*);

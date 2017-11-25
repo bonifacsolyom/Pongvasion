@@ -4,22 +4,23 @@
 bool initSDL(char* title) {
 	bool success = true;
 
-	//TODO: AUTOMATIC SCREEN RESOLUTION DETECION
-	globalWindowWidth = 1280;
-	globalWindowHeight = 720;
 
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
 		logErrorSDL("Unable to initialize SDL: %s");
 		success = false;
 	} else {
+		SDL_DisplayMode displayDetails;
+		SDL_GetCurrentDisplayMode(0, &displayDetails);
+		globalWindowWidth = displayDetails.w;
+		globalWindowHeight = displayDetails.h;
 
 		globalWindow = SDL_CreateWindow(title,
 										SDL_WINDOWPOS_CENTERED,
 										SDL_WINDOWPOS_CENTERED,
 										globalWindowWidth,
 										globalWindowHeight,
-										0); //TODO: SDL_FULLSCREEN
+										SDL_WINDOW_FULLSCREEN);
 		if (globalWindow == 0) {
 			logErrorSDL("Error while creating the window: %s");
 			success = false;
@@ -40,9 +41,9 @@ bool initSDL(char* title) {
 }
 
 //Safely closes the program
-void closeGame(Score *scoreArray, int arraySize) {
+void closeGame(Score *scoreArray, int arraySize, bool isScoreCleanupNeeded) {
 	freeEnemies();
-	cleanUpScores(scoreArray, arraySize);
+	if (isScoreCleanupNeeded) cleanUpScores(scoreArray, arraySize);
 	SDL_DestroyWindow(globalWindow);
 	TTF_Quit();
 	SDL_Quit();
@@ -101,6 +102,7 @@ void start() {
 	bool isGameRunning = true;
 	bool isGameOver = false;
 	bool areScoresWrittenToFile = false;
+	bool userIsReadyToQuit = false;
 	char *windowTitle = "Pongvasion";
 	Score scoreArray[SCORES_TO_SAVE];
 
@@ -128,20 +130,31 @@ void start() {
 					if (!isGameOver) {
 						renderCurrentState();
 					} else {
+						int currentScorePosition;
 						if (!areScoresWrittenToFile) {
-							writeHighScoreToFile(scoreArray, SCORES_TO_SAVE);
+							currentScorePosition = writeHighScoreToFile(scoreArray, SCORES_TO_SAVE);
 							areScoresWrittenToFile = true;
 						}
-						renderHighScoreScreen(scoreArray, SCORES_TO_SAVE);
+						renderHighScoreScreen(scoreArray, SCORES_TO_SAVE, currentScorePosition);
 					}
 				}
 				break;
 			case SDL_QUIT:
 				isGameRunning = false;
 				break;
+			case SDL_KEYUP:
+				if (areScoresWrittenToFile) {
+					userIsReadyToQuit= true;
+				}
+				break;
+			case SDL_KEYDOWN:
+				if (userIsReadyToQuit) {
+					isGameRunning = false;
+				}
+				break;
 			}
 		}
 	}
 
-	closeGame(scoreArray, SCORES_TO_SAVE);
+	closeGame(scoreArray, SCORES_TO_SAVE, areScoresWrittenToFile);
 }
