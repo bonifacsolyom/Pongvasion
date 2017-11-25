@@ -1,16 +1,23 @@
 #include "score.h"
 
-globalScore = 0;
+int globalScore = 0;
+int previousScore = -1;
 TTF_Font *scoreFont;
 TTF_Font *highScoreFont;
 SDL_Texture *scoreTexture;
+SDL_Texture *highScoreTexture;
+HighScore *highScoreArray;
+
 SDL_Color scoreColor;
 
 int scoreSurfaceWidth;
 int scoreSurfaceHeight;
 
-void initScore() {
+bool createdHighScoreTextures = false;
+
+void initScore(int arraySize) {
 	//TODO: NO HARDCODED VALUES
+	//TODO: ERROR HANDLING
 	scoreFont = TTF_OpenFont("data/04B_30__.ttf", 28);
 	highScoreFont = TTF_OpenFont("data/04B_30__.ttf", 50);
 
@@ -18,6 +25,9 @@ void initScore() {
 	scoreColor.g = 255;
 	scoreColor.b = 255;
 	scoreColor.a = 255;
+
+
+	highScoreArray = (HighScore *)malloc(sizeof(HighScore) * arraySize);
 }
 
 //Returns the current date in string form
@@ -32,7 +42,7 @@ char *getCurrentTime() {
 
 void readHighScoresFromFile(Score *scoreArray, int arraySize) {
 	FILE *scoreFile;
-
+	//TODO: ERROR HANDLING
 	scoreFile = fopen("data/scores.txt", "r");
 	char buffer[255];
 	for (int i = 0; i < arraySize; i++) {
@@ -63,13 +73,15 @@ void writeHighScoreToFile(Score *scoreArray, int arraySize) {
 		tempScore = scoreArray[pos];
 		scoreArray[pos] = replaceScore;
 		replaceScore = tempScore;
+		if (pos == arraySize - 1) {
+			printf("FREEING tempscore: %p\n", tempScore.date);
+	free(tempScore.date);
+		}
 	}
 
-	printf("FREEING tempscore: %p\n", tempScore.date);
-	free(tempScore.date);
 
 	FILE *scoreFile;
-
+	//TODO: ERROR HANDLING
 	scoreFile = fopen("data/scores.txt", "w+");
 	for (int i = 0; i < arraySize; i++) {
 		fprintf(scoreFile, "%s\n%d\n", scoreArray[i].date, scoreArray[i].score);
@@ -80,15 +92,18 @@ void writeHighScoreToFile(Score *scoreArray, int arraySize) {
 
 
 void updateScore() {
-	char scoreString[20];
-	sprintf(scoreString, "Score: %d", globalScore); //Effectively creates a string out of an integer (globalScore)
+	if (previousScore != globalScore) {
+		previousScore = globalScore;
+		char scoreString[20];
+		sprintf(scoreString, "Score: %d", globalScore); //Effectively creates a string out of an integer (globalScore)
 
-	SDL_Surface* scoreSurface = TTF_RenderText_Solid(scoreFont, scoreString, scoreColor);
-	//TODO: ERROR HANDLING
-	scoreSurfaceWidth = scoreSurface->w;
-	scoreSurfaceHeight = scoreSurface->h;
-	scoreTexture = SDL_CreateTextureFromSurface(globalRenderer, scoreSurface);
-	SDL_FreeSurface(scoreSurface);
+		SDL_Surface* scoreSurface = TTF_RenderText_Solid(scoreFont, scoreString, scoreColor);
+		//TODO: ERROR HANDLING
+		scoreSurfaceWidth = scoreSurface->w;
+		scoreSurfaceHeight = scoreSurface->h;
+		scoreTexture = SDL_CreateTextureFromSurface(globalRenderer, scoreSurface);
+		SDL_FreeSurface(scoreSurface);
+	}
 }
 
 void renderScore() {
@@ -106,26 +121,33 @@ void renderScore() {
 void renderHighScoreScreen(Score *scoreArray, int arraySize) {
 	SDL_SetRenderDrawColor(globalRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(globalRenderer);
+
 	//TODO: DON'T RENDER IF 0
+	//TODO: HIGHLIGHT CURRENT SCORE WITH YELLOW
 	for (int i = 0; i < arraySize; i++) {
 		char highScoreString[50];
 		sprintf(highScoreString, "%s: %d", scoreArray[i].date, scoreArray[i].score);
-
-		SDL_Surface* highScoreSurface = TTF_RenderText_Solid(highScoreFont, highScoreString, scoreColor);
-		//TODO: ERROR HANDLING
-		int highScoreSurfaceWidth = highScoreSurface->w;
-		int highScoreSurfaceHeight = highScoreSurface->h;
-		SDL_Texture *highScoreTexture = SDL_CreateTextureFromSurface(globalRenderer, highScoreSurface);
-		SDL_FreeSurface(highScoreSurface);
-
+		//TTF_RenderText_Solid is a very cpu intensive method, so we have to make sure only to call it when necessary
+		if (!createdHighScoreTextures) {
+			SDL_Surface* highScoreSurface = TTF_RenderText_Solid(highScoreFont, highScoreString, scoreColor);
+			if (highScoreSurface == 0) {
+				printf("Error while creating the SDL_Surface for the high scores: %s\n", SDL_GetError());
+			} else {
+				highScoreArray[i].width = highScoreSurface->w;
+				highScoreArray[i].height = highScoreSurface->h;
+				highScoreArray[i].texture = SDL_CreateTextureFromSurface(globalRenderer, highScoreSurface);
+				SDL_FreeSurface(highScoreSurface);
+			}
+		}
 		SDL_Rect targetRect;
-		targetRect.x = (globalWindowWidth / 2) - (highScoreSurfaceWidth / 2);
-		targetRect.y = ((globalWindowHeight - (highScoreSurfaceHeight / 2)) / arraySize) * i + (highScoreSurfaceHeight / 2);
-		targetRect.w = highScoreSurfaceWidth;
-		targetRect.h = highScoreSurfaceHeight;
+		targetRect.x = (globalWindowWidth / 2) - (highScoreArray[i].width / 2);
+		targetRect.y = ((globalWindowHeight - (highScoreArray[i].height / 2)) / arraySize) * i + (highScoreArray[i].height / 2);
+		targetRect.w = highScoreArray[i].width;
+		targetRect.h = highScoreArray[i].height;
 
-		SDL_RenderCopy(globalRenderer, highScoreTexture, 0, &targetRect);
+		SDL_RenderCopy(globalRenderer, highScoreArray[i].texture, 0, &targetRect);
 	}
+	createdHighScoreTextures = true;
 
 	SDL_RenderPresent(globalRenderer);
 }

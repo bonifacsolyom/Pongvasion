@@ -102,7 +102,7 @@ void start() {
 	bool isGameOver = false;
 	bool areScoresWrittenToFile = false;
 	char *windowTitle = "Pongvasion";
-	Score *scoreArray[SCORES_TO_SAVE];
+	Score scoreArray[SCORES_TO_SAVE];
 
 	initSDL(windowTitle);
 	initTimers();
@@ -110,7 +110,7 @@ void start() {
 	initPads();
 	initBall();
 	initEnemies();
-	initScore();
+	initScore(SCORES_TO_SAVE);
 
 	const uint8_t *keyboardState = SDL_GetKeyboardState(0); //Updates every time SDL_PollEvent() is called
 

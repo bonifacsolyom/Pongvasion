@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <SDL_ttf.h>
 
@@ -16,11 +17,17 @@ typedef struct Score {
 	int score;
 } Score;
 
-void initScore();
+typedef struct HighScore {
+	SDL_Texture *texture;
+	int width;
+	int height;
+} HighScore;
+
+void initScore(int);
 void readHighScoresFromFile(Score *, int);
 void writeHighScoreToFile(Score *, int);
 void updateScore();
 void renderScore();
-void renderHighScoreScreen();
+void renderHighScoreScreen(Score *, int);
 void cleanUpScores(Score *, int);
 
