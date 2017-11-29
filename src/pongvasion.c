@@ -1,10 +1,7 @@
 #include "pongvasion.h"
 
-//Initializes SDL and handles all errors
 bool initSDL(char* title) {
 	bool success = true;
-
-
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
 		logErrorSDL("Unable to initialize SDL: %s");
@@ -40,16 +37,14 @@ bool initSDL(char* title) {
 	return success;
 }
 
-//Safely closes the program
-void closeGame(Score *scoreArray, int arraySize, bool isScoreCleanupNeeded) {
+void closeGame(Score *scoreArray, int arraySize) {
 	freeEnemies();
-	if (isScoreCleanupNeeded) cleanUpScores(scoreArray, arraySize);
+	cleanUpScores(scoreArray, arraySize);
 	SDL_DestroyWindow(globalWindow);
 	TTF_Quit();
 	SDL_Quit();
 }
 
-//The event that's called by SDL's timers. It sends an SDL_USEREVENT to the message queue with a parameter attached
 Uint32 timerCallbackSDL(Uint32 interval, void *param) {
 	SDL_Event event;
 	event.type = SDL_USEREVENT;
@@ -57,10 +52,8 @@ Uint32 timerCallbackSDL(Uint32 interval, void *param) {
 	SDL_PushEvent(&event);
 
 	return interval;
-
 }
 
-//Initializes SDL timers
 void initTimers() {
 	int delayBetweenFrames = MILLISECONDS_IN_A_SECOND / FPSLIMIT;
 	int tickRate = MILLISECONDS_IN_A_SECOND / TICKS_PER_SECOND;
@@ -72,7 +65,6 @@ void initTimers() {
 	}
 }
 
-//A simple SDL logger that makes life easier
 void logErrorSDL(char* errorMessage) {
 	printf("%s\n%s", errorMessage, SDL_GetError());
 }
@@ -102,9 +94,9 @@ void start() {
 	bool isGameRunning = true;
 	bool isGameOver = false;
 	bool areScoresWrittenToFile = false;
-	bool userIsReadyToQuit = false;
+	bool playerIsReadyToQuit = false;
 	char *windowTitle = "Pongvasion";
-	Score scoreArray[SCORES_TO_SAVE];
+	Score scoreArray[SCORES_TO_SAVE] = {0};
 
 	initSDL(windowTitle);
 	initTimers();
@@ -116,45 +108,39 @@ void start() {
 
 	const uint8_t *keyboardState = SDL_GetKeyboardState(0); //Updates every time SDL_PollEvent() is called
 
+	SDL_Event sdlEvent;
 	while (isGameRunning) {
-		SDL_Event sdlEvent;
-
-		while (SDL_PollEvent(&sdlEvent)) {
-			switch (sdlEvent.type) {
-			case SDL_USEREVENT:
-				if (sdlEvent.user.code == TIMER_TICK) {
-					if (!isGameOver) {
-						isGameOver = updateGameState(keyboardState);
+		SDL_PollEvent(&sdlEvent);
+		switch (sdlEvent.type) {
+		case SDL_USEREVENT:
+			if (sdlEvent.user.code == TIMER_TICK) {
+				if (!isGameOver) {
+					isGameOver = updateGameState(keyboardState);
+				}
+			} else if (sdlEvent.user.code == TIMER_FPS) {
+				if (!isGameOver) {
+					renderCurrentState();
+				} else {
+					int currentScorePosition;
+					if (!areScoresWrittenToFile) {
+						currentScorePosition = writeHighScoreToFile(scoreArray, SCORES_TO_SAVE);
+						areScoresWrittenToFile = true;
 					}
-				} else if (sdlEvent.user.code == TIMER_FPS) {
-					if (!isGameOver) {
-						renderCurrentState();
-					} else {
-						int currentScorePosition;
-						if (!areScoresWrittenToFile) {
-							currentScorePosition = writeHighScoreToFile(scoreArray, SCORES_TO_SAVE);
-							areScoresWrittenToFile = true;
-						}
-						renderHighScoreScreen(scoreArray, SCORES_TO_SAVE, currentScorePosition);
-					}
+					renderHighScoreScreen(scoreArray, SCORES_TO_SAVE, currentScorePosition);
 				}
-				break;
-			case SDL_QUIT:
-				isGameRunning = false;
-				break;
-			case SDL_KEYUP:
-				if (areScoresWrittenToFile) {
-					userIsReadyToQuit= true;
-				}
-				break;
-			case SDL_KEYDOWN:
-				if (userIsReadyToQuit) {
-					isGameRunning = false;
-				}
-				break;
 			}
+			break;
+		case SDL_QUIT:
+			isGameRunning = false;
+			break;
+		case SDL_KEYDOWN:
+			if (areScoresWrittenToFile && sdlEvent.key.repeat == 0) {
+				isGameRunning = false;
+			}
+			break;
 		}
+
 	}
 
-	closeGame(scoreArray, SCORES_TO_SAVE, areScoresWrittenToFile);
+	closeGame(scoreArray, SCORES_TO_SAVE);
 }

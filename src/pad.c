@@ -28,16 +28,12 @@ void initPads() {
 	rightPad.color.a = 255;
 }
 
-//Checks if the next move of the pads would be out of bounds in the upward direction
-//returns true when it's okay to move, otherwise false.
 bool boundaryCheckUp() {
 	//The position of the two pads should always be the same, we're checking for both just in case
 	if (((leftPad.y - padSpeed) < 0) || ((rightPad.y - padSpeed) < 0)) return false;
 	return true;
 }
 
-//Checks if the next move of the pad would be out of bounds in the downwards direction
-//returns true when it's okay to move, otherwise false.
 bool boundaryCheckDown() {
 	//The position of the two pads should always be the same, we're checking for both just in case
 	if ((((leftPad.y + leftPad.length) + padSpeed) > globalWindowHeight) || (((rightPad.y + rightPad.length) + padSpeed) > globalWindowHeight)) return false;

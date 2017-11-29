@@ -6,7 +6,7 @@ TTF_Font *scoreFont;
 TTF_Font *highScoreFont;
 SDL_Texture *scoreTexture;
 SDL_Texture *highScoreTexture;
-HighScore *highScoreArray;
+HighScoreTexture *highScoreArray;
 
 SDL_Color scoreColor;
 SDL_Color currentScoreColor;
@@ -33,7 +33,7 @@ void initScore(int arraySize) {
 	currentScoreColor.a = 255;
 
 
-	highScoreArray = (HighScore *)malloc(sizeof(HighScore) * arraySize);
+	highScoreArray = (HighScoreTexture *)malloc(sizeof(HighScoreTexture) * arraySize);
 }
 
 //Returns the current date in string form
@@ -58,7 +58,9 @@ void readHighScoresFromFile(Score *scoreArray, int arraySize) {
 	for (int i = 0; i < arraySize; i++) {
 		fscanf(scoreFile, "%s", buffer);
 		scoreArray[i].date = (char *)malloc(sizeof(char) * (strlen(buffer) + 1));
+#ifdef _DEBUG
 		printf("scoreArray[%d].date: %p\n", i, scoreArray[i].date);
+#endif
 		strcpy(scoreArray[i].date, buffer);
 		fscanf(scoreFile, "%d", &(scoreArray[i].score));
 	}
@@ -106,6 +108,7 @@ int writeHighScoreToFile(Score *scoreArray, int arraySize) {
 
 
 void updateScore() {
+	//This check is needed in order to avoid calling TTF_RenderText_Solid needlessly as it's a fairly hard task for the cpu
 	if (previousScore != globalScore) {
 		previousScore = globalScore;
 		char scoreString[20];
@@ -143,7 +146,7 @@ void renderHighScoreScreen(Score *scoreArray, int arraySize, int currentScorePos
 		if (strcmp(scoreArray[i].date, "0") != 0) {
 			sprintf(highScoreString, "%s %d", scoreArray[i].date, scoreArray[i].score);
 		} else {
-			strcpy(highScoreString, " ");
+			strcpy(highScoreString, " "); //Temporary workaround that will probably stay here forever
 		}
 		//TTF_RenderText_Solid is a very cpu intensive method, so we have to make sure only to call it when necessary
 		if (!createdHighScoreTextures) {
@@ -159,9 +162,12 @@ void renderHighScoreScreen(Score *scoreArray, int arraySize, int currentScorePos
 		}
 		SDL_Rect targetRect;
 		targetRect.x = (globalWindowWidth / 2) - (highScoreArray[i].width / 2);
-		targetRect.y = ((globalWindowHeight - (highScoreArray[i].height / 2)) / arraySize) * i + (highScoreArray[i].height / 2);
+		targetRect.y = (globalWindowHeight / arraySize) * i + (globalWindowHeight / arraySize - highScoreArray[i].height) / 2;
 		targetRect.w = highScoreArray[i].width;
 		targetRect.h = highScoreArray[i].height;
+#ifdef _DEBUG
+		boxColor(globalRenderer, targetRect.x, targetRect.y, targetRect.x + targetRect.w, targetRect.y + targetRect.h, 0xFF0000FF);
+#endif
 
 		SDL_RenderCopy(globalRenderer, highScoreArray[i].texture, 0, &targetRect);
 	}
@@ -174,14 +180,18 @@ void cleanUpScores(Score *scoreArray, int arraySize) {
 #ifdef _DEBUG
 	printf("FREEING:\n");
 #endif
-	for (int i = 0; i < arraySize; i++) {
-		//memset(scoreArray[i].date, 0xFF, );
-		free(scoreArray[i].date);
+	if (scoreArray != 0) {
+		for (int i = 0; i < arraySize; i++) {
+			free(scoreArray[i].date);
+			SDL_DestroyTexture(highScoreArray[i].texture);
 #ifdef _DEBUG
-		printf("scoreArray[%d].date: %p\n", i, scoreArray[i].date);
+			printf("scoreArray[%d].date: %p\n", i, scoreArray[i].date);
 #endif
+
+		}
 	}
 
+	free(highScoreArray);
 	SDL_DestroyTexture(scoreTexture);
 	TTF_CloseFont(scoreFont);
 	TTF_CloseFont(highScoreFont);

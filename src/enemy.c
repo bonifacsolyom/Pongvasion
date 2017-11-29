@@ -40,7 +40,6 @@ void initEnemies() {
 	enemyList.last->previous = enemyList.first;
 }
 
-//Generates enemies with a random chance, easier enemies have a bigger chance of spawning
 void generateEnemies() {
 	int enemyCount = 0;
 	EnemyListUnit *movingPointer = enemyList.first;
@@ -57,7 +56,6 @@ void generateEnemies() {
 	}
 }
 
-//Initializes and adds a new enemy to the linked list of enemies
 void spawnEnemy(Enemy enemy) {
 	EnemyListUnit *newListUnit = (EnemyListUnit *)malloc(sizeof(EnemyListUnit));
 	enemyList.last->previous->next = newListUnit;
@@ -70,7 +68,6 @@ void spawnEnemy(Enemy enemy) {
 	enemyList.last->previous->enemy.x = randomNumber(leftPad.x + leftPad.width + enemyList.last->previous->enemy.radius, rightPad.x - enemyList.last->previous->enemy.radius);
 }
 
-//Should be called when the ball hits the enemy
 void deleteEnemy(EnemyListUnit *enemyToDelete) {
 	globalScore += enemyToDelete->enemy.points;
 	//The following is done so the player can't exploit the ball bouncing between the two pads with a vertical speed of 0
@@ -99,8 +96,6 @@ bool isCollidingWithBall(Enemy enemy) {
 	return distanceSquared <= maxDistanceSquared;
 }
 
-//Updates the states of the enemies
-//Returns true when one of them has hit the bottom of the screen
 bool updateEnemies() {
 	EnemyListUnit *movingPointer = enemyList.first->next;
 	while (movingPointer != enemyList.last) {

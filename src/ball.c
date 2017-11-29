@@ -15,8 +15,7 @@ void initBall() {
 	ball.color.a = 255;
 }
 
-//Given a specific point, it returns the closest point of the Ball's edge to it
-Point getClosestPointOfBall(Ball tempBall, Point pointToCompareTo) {
+Point getClosestPointOfBall(Point pointToCompareTo) {
 	Point returnPoint;
 	//the degree of the line between the circle's midpoint and the given point
 	double alpha = atan2(ball.y - pointToCompareTo.y, pointToCompareTo.x - ball.x);
@@ -26,8 +25,6 @@ Point getClosestPointOfBall(Ball tempBall, Point pointToCompareTo) {
 	return returnPoint;
 }
 
-//Gets the closest point of the pad to the center of the ball
-//Accepts LEFT_PAD or RIGHT_PAD as a parameter
 Point getClosestPointOfPad(int whichPad) {
 	Point returnPoint;
 	if (whichPad == LEFT_PAD) {
@@ -57,7 +54,6 @@ Point getClosestPointOfPad(int whichPad) {
 	return returnPoint;
 }
 
-//Detects if the ball is colliding with anything, and changes its speed accordingly if so
 void detectBallCollision() {
 	//The radius in which collision is checked between the ball and the pad
 	int collisionRadius = ball.horizontalSpeed;
@@ -65,11 +61,11 @@ void detectBallCollision() {
 	int ballTop = ball.y - ball.radius;
 	int ballBottom = ball.y + ball.radius;
 
-	//Detect if touching any pads
+	//Detect if the ball is touching any of the two pads
 	if (ball.horizontalSpeed > 0) { //If the ball is headed towards the right, we only need to check collision with the right pad
 		if ((ballBottom >= rightPad.y) && (ballTop <= (rightPad.y + rightPad.length))) { //If the ball is in line with the pad
 			Point closestPointOfPad = getClosestPointOfPad(RIGHT_PAD);
-			Point closestPointOfBall = getClosestPointOfBall(ball, closestPointOfPad);
+			Point closestPointOfBall = getClosestPointOfBall(closestPointOfPad);
 			//The first check is to see whether the center of the ball has already surpassed the pad or not
 			if ((ball.x <= rightPad.x) && (closestPointOfBall.x >= closestPointOfPad.x) && ((closestPointOfBall.x - collisionRadius) < closestPointOfPad.x)) {
 				int rightPadMiddle = rightPad.y + (rightPad.length / 2);
@@ -81,7 +77,7 @@ void detectBallCollision() {
 	} else { //The ball is headed towards the left pad
 		if ((ballBottom >= leftPad.y) && (ballTop <= (leftPad.y + leftPad.length))) { //If the ball is in line with the pad
 			Point closestPointOfPad = getClosestPointOfPad(LEFT_PAD);
-			Point closestPointOfBall = getClosestPointOfBall(ball, closestPointOfPad);
+			Point closestPointOfBall = getClosestPointOfBall(closestPointOfPad);
 			//The first check is to see whether the center of the ball has already surpassed the pad or not
 			if ((ball.x >= leftPad.x) && (closestPointOfBall.x <= closestPointOfPad.x) && ((closestPointOfBall.x - collisionRadius) > closestPointOfPad.x)) {
 				int leftPadMiddle = leftPad.y + (leftPad.length / 2);
@@ -92,7 +88,7 @@ void detectBallCollision() {
 		}
 	}
 
-	//Detect if touching the top or bottom of the screen
+	//Detect if the ball is touching the top or bottom of the screen
 	bool isBallTouchingTheTop = (ballTop + ball.verticalSpeed) < 0;
 	bool isBallTouchingTheBottom = (ballBottom + ball.verticalSpeed) > globalWindowHeight;
 	if (isBallTouchingTheTop || isBallTouchingTheBottom) ball.verticalSpeed *= -1;
@@ -146,7 +142,7 @@ void renderBall() {
 					 0,
 					 0,
 					 255);
-	Point pointBallLeft = getClosestPointOfBall(ball, pointLeft);
+	Point pointBallLeft = getClosestPointOfBall(pointLeft);
 	filledCircleRGBA(globalRenderer,
 					 pointBallLeft.x,
 					 pointBallLeft.y,
@@ -155,7 +151,7 @@ void renderBall() {
 					 0,
 					 0,
 					 255);
-	Point pointBallRight = getClosestPointOfBall(ball, pointRight);
+	Point pointBallRight = getClosestPointOfBall(pointRight);
 	filledCircleRGBA(globalRenderer,
 					 pointBallRight.x,
 					 pointBallRight.y,
