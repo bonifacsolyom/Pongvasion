@@ -17,7 +17,7 @@ void initBall() {
 
 Point getClosestPointOfBall(Point pointToCompareTo) {
 	Point returnPoint;
-	//the degree of the line between the circle's midpoint and the given point
+	//The degree of the line between the circle's midpoint and the given point
 	double alpha = atan2(ball.y - pointToCompareTo.y, pointToCompareTo.x - ball.x);
 
 	returnPoint.x = (int)round((double)ball.x + cos(alpha) * (double)ball.radius);
@@ -69,7 +69,7 @@ void detectBallCollision() {
 			//The first check is to see whether the center of the ball has already surpassed the pad or not
 			if ((ball.x <= rightPad.x) && (closestPointOfBall.x >= closestPointOfPad.x) && ((closestPointOfBall.x - collisionRadius) < closestPointOfPad.x)) {
 				int rightPadMiddle = rightPad.y + (rightPad.length / 2);
-				//(Distance of the ball from the middle of the pad) / (Length of the pad's half) -> This way we get a value between -1 and 1, which we then multiply with the maximum vertical speed.
+				//(Distance of the ball from the middle of the pad) / (Length of the pad's half) -> This way we get a value between -1 and 1, which we then multiply by the maximum vertical speed.
 				ball.verticalSpeed = (int)(((double)(closestPointOfBall.y - rightPadMiddle) / (double)(rightPad.length / 2)) * maxVerticalSpeed);
 				ball.horizontalSpeed *= -1;
 			}
@@ -81,7 +81,7 @@ void detectBallCollision() {
 			//The first check is to see whether the center of the ball has already surpassed the pad or not
 			if ((ball.x >= leftPad.x) && (closestPointOfBall.x <= closestPointOfPad.x) && ((closestPointOfBall.x - collisionRadius) > closestPointOfPad.x)) {
 				int leftPadMiddle = leftPad.y + (leftPad.length / 2);
-				//(Distance of the ball from the middle of the pad) / (Length of the pad's half) -> This way we get a value between -1 and 1, which we then multiply with the maximum vertical speed.
+				//(Distance of the ball from the middle of the pad) / (Length of the pad's half) -> This way we get a value between -1 and 1, which we then multiply by the maximum vertical speed.
 				ball.verticalSpeed = (int)(((double)(closestPointOfBall.y - leftPadMiddle) / (double)(leftPad.length / 2)) * maxVerticalSpeed);
 				ball.horizontalSpeed *= -1;
 			}
