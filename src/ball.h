@@ -63,11 +63,6 @@ Point getClosestPointOfPad(int whichPad);
 void detectBallCollision();
 
 /**
- * Detects if the ball is over the maximum vertical speed limit (maxVerticalSpeed), and if yes, reduces it to the limit
- */
-void detectBallMaxSpeed();
-
-/**
  * Detects if the ball left the screen on the left or the right
  * @return true if the ball is out of bounds, otherwise false
  */

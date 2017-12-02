@@ -94,10 +94,6 @@ void detectBallCollision() {
 	if (isBallTouchingTheTop || isBallTouchingTheBottom) ball.verticalSpeed *= -1;
 }
 
-void detectBallMaxSpeed() {
-	if (ball.verticalSpeed > maxVerticalSpeed) ball.verticalSpeed = maxVerticalSpeed;
-	else if (ball.verticalSpeed < -maxVerticalSpeed) ball.verticalSpeed = -maxVerticalSpeed;
-}
 
 bool detectIfOutOfBounds() {
 	bool onTheRight = (ball.x - ball.radius) > globalWindowWidth;
@@ -107,7 +103,6 @@ bool detectIfOutOfBounds() {
 
 bool updateBall() {
 	detectBallCollision();
-	detectBallMaxSpeed();
 	ball.x += ball.horizontalSpeed;
 	ball.y += ball.verticalSpeed;
 	return detectIfOutOfBounds();
