@@ -40,20 +40,23 @@ typedef struct EnemyList {
 
 /**
  * Initializes all the different kinds of enemies
+ * @return the Linked List that the enemies are stored in.
  */
-void initEnemies();
+EnemyList initEnemies();
 
 /**
  * Generates enemies with a random chance, easier enemies have a bigger chance of spawning
  * The amount of enemies on screen is also taken into account
+ * @param enemyList The linked list that stores the enemies
  */
-void generateEnemies();
+void generateEnemies(EnemyList enemyList);
 
 /**
  * Initializes and adds a new enemy to the linked list of enemies
  * @param enemy The enemy that is to be spawned
+ * @param enemyList The linked list that stores the enemies
  */
-void spawnEnemy(Enemy enemy);
+void spawnEnemy(Enemy enemy, EnemyList enemyList);
 
 /**
  * Should be called when the ball hits the enemy
@@ -71,17 +74,20 @@ bool isCollidingWithBall(Enemy enemy);
 
 /**
  * Updates the states of the enemies
+ * @param enemyList The linked list that stores the enemies
  * @return true when one of them has hit the bottom of the screen, thus ending the game
  */
-bool updateEnemies();
+bool updateEnemies(EnemyList enemyList);
 
 /**
 * Renders all the enemies on the globalRenderer
+* @param enemyList The linked list that stores the enemies
 */
-void renderEnemies();
+void renderEnemies(EnemyList enemyList);
 
 /**
  * Frees the memory that was allocated for the enemies
  * Called when the user closes the program
+ * @param enemyList The linked list that stores the enemies
  */
-void freeEnemies();
+void freeEnemies(EnemyList enemyList);

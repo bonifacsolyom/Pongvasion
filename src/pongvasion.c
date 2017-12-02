@@ -37,9 +37,9 @@ bool initSDL(char* title) {
 	return success;
 }
 
-void closeGame(Score *scoreArray, int arraySize) {
-	freeEnemies();
-	cleanUpScores(scoreArray, arraySize);
+void closeGame(Score *scoreArray, int arraySize, EnemyList enemyList, HighScoreTexture *highScoreArray) {
+	freeEnemies(enemyList);
+	cleanUpScores(scoreArray, arraySize, highScoreArray);
 	SDL_DestroyWindow(globalWindow);
 	TTF_Quit();
 	SDL_Quit();
@@ -69,11 +69,11 @@ void logErrorSDL(char* errorMessage) {
 	printf("%s\n%s", errorMessage, SDL_GetError());
 }
 
-void renderCurrentState() {
+void renderCurrentState(EnemyList enemyList) {
 	SDL_SetRenderDrawColor(globalRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(globalRenderer);
 	renderPads();
-	renderEnemies();
+	renderEnemies(enemyList);
 	renderBall();
 	renderScore();
 
@@ -81,11 +81,11 @@ void renderCurrentState() {
 }
 
 //Returns true when game is over
-bool updateGameState(const uint8_t *keyboardState) {
+bool updateGameState(const uint8_t *keyboardState, EnemyList enemyList) {
 	updatePads(keyboardState);
 	bool ballOut = updateBall();
-	generateEnemies();
-	bool enemyReached = updateEnemies();
+	generateEnemies(enemyList);
+	bool enemyReached = updateEnemies(enemyList);
 	updateScore();
 	return ballOut || enemyReached;
 }
@@ -97,14 +97,16 @@ void start() {
 	bool playerIsReadyToQuit = false;
 	char *windowTitle = "Pongvasion";
 	Score scoreArray[SCORES_TO_SAVE] = {0};
+	EnemyList enemyList;
+	HighScoreTexture *highScoreArray;
 
 	initSDL(windowTitle);
 	initTimers();
 	initRandom();
 	initPads();
 	initBall();
-	initEnemies();
-	initScore(SCORES_TO_SAVE);
+	enemyList = initEnemies();
+	highScoreArray = initScore(SCORES_TO_SAVE);
 
 	const uint8_t *keyboardState = SDL_GetKeyboardState(0); //Updates every time SDL_PollEvent() is called
 
@@ -115,18 +117,18 @@ void start() {
 		case SDL_USEREVENT:
 			if (sdlEvent.user.code == TIMER_TICK) {
 				if (!isGameOver) {
-					isGameOver = updateGameState(keyboardState);
+					isGameOver = updateGameState(keyboardState, enemyList);
 				}
 			} else if (sdlEvent.user.code == TIMER_FPS) {
 				if (!isGameOver) {
-					renderCurrentState();
+					renderCurrentState(enemyList);
 				} else {
 					int currentScorePosition;
 					if (!areScoresWrittenToFile) {
 						currentScorePosition = writeHighScoreToFile(scoreArray, SCORES_TO_SAVE);
 						areScoresWrittenToFile = true;
 					}
-					renderHighScoreScreen(scoreArray, SCORES_TO_SAVE, currentScorePosition);
+					renderHighScoreScreen(scoreArray, SCORES_TO_SAVE, currentScorePosition, highScoreArray);
 				}
 			}
 			break;
@@ -142,5 +144,5 @@ void start() {
 
 	}
 
-	closeGame(scoreArray, SCORES_TO_SAVE);
+	closeGame(scoreArray, SCORES_TO_SAVE, enemyList, highScoreArray);
 }

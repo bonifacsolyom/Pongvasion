@@ -6,7 +6,7 @@ TTF_Font *scoreFont;
 TTF_Font *highScoreFont;
 SDL_Texture *scoreTexture;
 SDL_Texture *highScoreTexture;
-HighScoreTexture *highScoreArray;
+//HighScoreTexture *highScoreArray;
 
 SDL_Color scoreColor;
 SDL_Color currentScoreColor;
@@ -16,7 +16,7 @@ int scoreSurfaceHeight;
 
 bool createdHighScoreTextures = false;
 
-void initScore(int arraySize) {
+HighScoreTexture *initScore(int arraySize) {
 	scoreFont = TTF_OpenFont("data/04B_30__.ttf", globalWindowHeight / 24);
 	highScoreFont = TTF_OpenFont("data/04B_30__.ttf", globalWindowHeight / 15);
 	if (scoreFont == 0 || highScoreFont == 0) {
@@ -32,8 +32,9 @@ void initScore(int arraySize) {
 	currentScoreColor.b = 0;
 	currentScoreColor.a = 255;
 
-
+	HighScoreTexture *highScoreArray;
 	highScoreArray = (HighScoreTexture *)malloc(sizeof(HighScoreTexture) * arraySize);
+	return highScoreArray;
 }
 
 //Returns the current date in string form
@@ -137,7 +138,7 @@ void renderScore() {
 	SDL_RenderCopy(globalRenderer, scoreTexture, 0, &targetRect);
 }
 
-void renderHighScoreScreen(Score *scoreArray, int arraySize, int currentScorePosition) {
+void renderHighScoreScreen(Score *scoreArray, int arraySize, int currentScorePosition, HighScoreTexture *highScoreArray) {
 	SDL_SetRenderDrawColor(globalRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(globalRenderer);
 
@@ -176,7 +177,7 @@ void renderHighScoreScreen(Score *scoreArray, int arraySize, int currentScorePos
 	SDL_RenderPresent(globalRenderer);
 }
 
-void cleanUpScores(Score *scoreArray, int arraySize) {
+void cleanUpScores(Score *scoreArray, int arraySize, HighScoreTexture *highScoreArray) {
 #ifdef _DEBUG
 	printf("FREEING:\n");
 #endif

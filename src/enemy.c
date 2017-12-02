@@ -4,9 +4,8 @@
 Enemy easyEnemy;
 Enemy normalEnemy;
 Enemy hardEnemy;
-EnemyList enemyList;
 
-void initEnemies() {
+EnemyList initEnemies() {
 	easyEnemy.radius = globalWindowHeight / 14;
 	easyEnemy.points = 10;
 	easyEnemy.speed = (double)globalWindowHeight / 7200;
@@ -34,13 +33,15 @@ void initEnemies() {
 	hardEnemy.color.a = 255;
 	hardEnemy.points = 100;
 
+	EnemyList enemyList;
 	enemyList.first = malloc(sizeof(EnemyListUnit));
 	enemyList.last = malloc(sizeof(EnemyListUnit));
 	enemyList.first->next = enemyList.last;
 	enemyList.last->previous = enemyList.first;
+	return enemyList;
 }
 
-void generateEnemies() {
+void generateEnemies(EnemyList enemyList) {
 	int enemyCount = 0;
 	EnemyListUnit *movingPointer = enemyList.first;
 	while (movingPointer->next != enemyList.last) {
@@ -48,15 +49,15 @@ void generateEnemies() {
 		movingPointer = movingPointer->next;
 	}
 	if (randomNumber(1, 10 * (enemyCount + 1) * (enemyCount + 1)) == 1) {
-		spawnEnemy(easyEnemy);
+		spawnEnemy(easyEnemy, enemyList);
 	} else if (randomNumber(1, 50 * (enemyCount + 1) * (enemyCount + 1)) == 1) {
-		spawnEnemy(normalEnemy);
+		spawnEnemy(normalEnemy, enemyList);
 	} else if (randomNumber(1, 100 * (enemyCount + 1) * (enemyCount + 1)) == 1) {
-		spawnEnemy(hardEnemy);
+		spawnEnemy(hardEnemy, enemyList);
 	}
 }
 
-void spawnEnemy(Enemy enemy) {
+void spawnEnemy(Enemy enemy, EnemyList enemyList) {
 	EnemyListUnit *newListUnit = (EnemyListUnit *)malloc(sizeof(EnemyListUnit));
 	enemyList.last->previous->next = newListUnit;
 	newListUnit->previous = enemyList.last->previous;
@@ -96,7 +97,7 @@ bool isCollidingWithBall(Enemy enemy) {
 	return distanceSquared <= maxDistanceSquared;
 }
 
-bool updateEnemies() {
+bool updateEnemies(EnemyList enemyList) {
 	EnemyListUnit *movingPointer = enemyList.first->next;
 	while (movingPointer != enemyList.last) {
 		if ((movingPointer->enemy.y + movingPointer->enemy.radius) >= globalWindowHeight) return true;
@@ -110,7 +111,7 @@ bool updateEnemies() {
 	return false;
 }
 
-void renderEnemies() {
+void renderEnemies(EnemyList enemyList) {
 	EnemyListUnit *movingPointer = enemyList.first->next;
 	while (movingPointer != enemyList.last) {
 		filledCircleRGBA(globalRenderer,
@@ -126,7 +127,7 @@ void renderEnemies() {
 }
 
 //Frees the memory, should be called when exiting the program
-void freeEnemies() {
+void freeEnemies(EnemyList enemyList) {
 	EnemyListUnit *movingPointer = enemyList.first;
 	while (movingPointer != enemyList.last) {
 		EnemyListUnit *next = movingPointer->next;

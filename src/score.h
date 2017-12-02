@@ -13,7 +13,6 @@
 
 int globalScore;
 
-
 /*
  * @struct Score
  * Represents a score that's displayed at the end of the game
@@ -38,8 +37,9 @@ typedef struct HighScoreTexture {
  * Loads the score font, sets its color
  * Allocates memory for the high score graphics
  * @param arraySize the size of the HighScoreTexture array
+ * @return The array that stores the high score textures
  */
-void initScore(int arraySize);
+HighScoreTexture *initScore(int arraySize);
 
 /*
  * Gets the local time, and returns it in string form
@@ -80,14 +80,16 @@ void renderScore();
  * @param arraySize the size of scoreArray
  * @param currentScorePosition the position of the currently achieved score so that it can be highlighted by yellow
  * Equals to arraySize in case the score was lower than all the previously achieved ones
+ * @param The array that stores the high score textures
  */
-void renderHighScoreScreen(Score *scoreArray, int arraySize, int currentScorePosition);
+void renderHighScoreScreen(Score *scoreArray, int arraySize, int currentScorePosition, HighScoreTexture *highScoreArray);
 
 /*
  * Frees the memory allocated for the score and highScore arrays
  * Calls the necessary SDL_TTF functions for exiting
  * @param scoreArray with the high scores
  * @param arraySize the size of scoreArray
+ * @param The array that stores the high score textures
  */
-void cleanUpScores(Score *scoreArray, int arraySize);
+void cleanUpScores(Score *scoreArray, int arraySize, HighScoreTexture *highScoreArray);
 

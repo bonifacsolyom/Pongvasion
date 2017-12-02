@@ -37,8 +37,10 @@ bool initSDL(char *title);
  * Should be called when the user quits the game
  * @param scoreArray the array that stores the scores read in from scores.txt
  * @param arraySize the size of scoreArray
+ * @param The linked list that stores the enemies
+ * @param The array that stores the high score textures
  */
-void closeGame(Score *scoreArray, int arraySize);
+void closeGame(Score *scoreArray, int arraySize, EnemyList enemyList, HighScoreTexture *highScoreArray);
 
 /*
  * The event that's called by SDL's timers.
@@ -63,14 +65,16 @@ void logErrorSDL(char* errorMessage);
 
 /*
  * Calls every method that's needed to render the current state of the game
+ * @param The linked list that stores the enemies
  */
-void renderCurrentState();
+void renderCurrentState(EnemyList enemyList);
 
 /*
  * Calls every method that's needed to update the current state of the game
  * @param keyboardState The state of the keyboard that was received by calling SDL_GetKeyboardState()
+ * @param The linked list that stores the enemies
  */
-bool updateGameState(const uint8_t *keyboardState);
+bool updateGameState(const uint8_t *keyboardState, EnemyList enemyList);
 
 /*
  * Calls every initializer method
